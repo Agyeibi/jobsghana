@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+{% if session.get('user_type') == 'employer' %}
+    <a href="/post-job" class="btn btn-success mb-3">Post a New Job</a>
+{% endif %}
+
+<div class="row">
+    {% for job in jobs %}
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ job[1] }} {% if job[6] == 1 %}💰Premium{% endif %}</h5>
+                <p>{{ job[2] }}</p>
+                <p>{{ job[3] }} | {{ job[4] }}</p>
+                {% if session.get('user_type') == 'jobseeker' %}
+                    <a href="/pay/{{ job[0] }}" class="btn btn-primary">Boost / Apply</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
