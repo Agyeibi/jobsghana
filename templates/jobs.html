@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container container-compact mt-5">
+  <h4>Search results for "{{ query }}"</h4>
+  {% if jobs %}
+    <ul class="list-group mt-3">
+      {% for job in jobs %}
+        <li class="list-group-item">
+          <strong>{{ job.title }}</strong> — {{ job.company }} ({{ job.location }})
+          <div>{{ job.description }}</div>
+          <small class="text-muted">Posted: {{ job.date_posted.strftime('%d %b %Y') }}</small>
+          {% if session.get('role') == 'Job Finder' %}
+            <div class="mt-2"><button class="btn btn-success btn-sm">Apply</button></div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No jobs found.</p>
+  {% endif %}
+</div>
+{% endblock %}

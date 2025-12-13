@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="container text-center">
+    <h1>Find Jobs or Hire Talent in Ghana</h1>
+    <p>Browse thousands of job listings or post your own jobs. Connecting talent and opportunities across Ghana.</p>
+
+    <div class="search-box-wrapper mt-4">
+      <form class="search-box" action="{{ url_for('search') }}" method="get">
+        <input type="text" name="query" placeholder="Search jobs, companies, locations..." required>
+        <button type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container container-compact">
+    <h2>Latest Jobs</h2>
+    <div class="row">
+      {% if jobs %}
+        {% for job in jobs %}
+        <div class="col-md-4">
+          <div class="card-feature">
+            <h5>{{ job.title }}</h5>
+            <p><strong>Company:</strong> {{ job.company }}</p>
+            <p><strong>Location:</strong> {{ job.location }}</p>
+            <p><strong>Posted:</strong> {{ job.date_posted.strftime('%b %d, %Y') }}</p>
+            <a href="#" class="btn btn-sm btn-dark mt-2 w-100">View Details</a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p>No jobs posted yet. Check back later!</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section style="background:#f9f9f9;">
+  <div class="container container-compact">
+    <h2>Why Choose JobsGhana?</h2>
+    <div class="row mt-4">
+      <div class="col-md-4"><div class="card-feature"><h5>Trusted Platform</h5><p>Connect safely with employers and job seekers across Ghana.</p></div></div>
+      <div class="col-md-4"><div class="card-feature"><h5>Easy to Use</h5><p>Post and find jobs quickly with our simple and responsive interface.</p></div></div>
+      <div class="col-md-4"><div class="card-feature"><h5>Free & Secure</h5><p>Sign up for free and enjoy secure communication and job postings.</p></div></div>
+    </div>
+  </div>
+</section>
+{% endblock %}
