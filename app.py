@@ -1,183 +1,188 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
-import re
+from datetime import datetime
+import os
+
+# ----------------------------------
+# APP CONFIG
+# ----------------------------------
 
 app = Flask(__name__)
-app.secret_key = "change_this_to_a_random_secret"  # <<-- change this for production!
+app.secret_key = "super-secret-key-change-this"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///jobs.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "jobs.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 db = SQLAlchemy(app)
 
-# ---------- Models ----------
+# ----------------------------------
+# DATABASE MODELS
+# ----------------------------------
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    region = db.Column(db.String(50), nullable=False)
-    role = db.Column(db.String(50), nullable=False)  # Job Finder / Job Giver
-    gender = db.Column(db.String(10), nullable=False)
-    dob = db.Column(db.Date, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
+    password = db.Column(db.String(300), nullable=False)
+    is_employer = db.Column(db.Boolean, default=False)
 
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150), nullable=False)
-    company = db.Column(db.String(150), nullable=False)
-    location = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    company = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    posted_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    requirements = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
 
-# ---------- Utilities ----------
-def calculate_age(born: date) -> int:
-    today = date.today()
-    age = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
-    return age
+# ----------------------------------
+# HOME / INDEX
+# ----------------------------------
 
-def valid_phone(phone: str) -> bool:
-    # Accepts +233XXXXXXXXX where X are digits (9 digits after +233)
-    return bool(re.fullmatch(r"\+233[0-9]{9}", phone))
-
-# ---------- Routes ----------
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('home.html')
+    jobs = Job.query.order_by(Job.date_posted.desc()).limit(10).all()
+    return render_template("home.html", jobs=jobs)
 
-@app.route('/register', methods=['POST'])
+# ----------------------------------
+# ALL JOBS
+# ----------------------------------
+
+@app.route("/jobs")
+def jobs():
+    jobs = Job.query.order_by(Job.date_posted.desc()).all()
+    return render_template("jobs.html", jobs=jobs)
+
+# ----------------------------------
+# JOB DETAILS (IMPORTANT FIX)
+# ----------------------------------
+
+@app.route("/job/<int:job_id>")
+def job_details(job_id):
+    job = Job.query.get_or_404(job_id)
+    return render_template("job_details.html", job=job)
+
+# ----------------------------------
+# REGISTER
+# ----------------------------------
+
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    # collect form data
-    name = request.form.get('name', '').strip()
-    email = request.form.get('email', '').strip().lower()
-    phone = request.form.get('phone', '').strip()
-    region = request.form.get('region', '').strip()
-    role = request.form.get('role', '').strip()
-    gender = request.form.get('gender', '').strip()
-    dob_str = request.form.get('dob', '').strip()
-    password = request.form.get('password', '')
+    if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+        password = request.form["password"]
+        role = request.form.get("role")
 
-    # Basic validation
-    if not all([name, email, phone, region, role, gender, dob_str, password]):
-        flash('All fields are required.')
-        return redirect(url_for('home'))
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash("Email already registered", "error")
+            return redirect(url_for("register"))
 
-    # Validate phone
-    if not valid_phone(phone):
-        flash('Phone must be in Ghana format: +233XXXXXXXXX')
-        return redirect(url_for('home'))
+        hashed_password = generate_password_hash(password)
 
-    # Parse DOB and check age >= 15
-    try:
-        dob = datetime.strptime(dob_str, "%Y-%m-%d").date()
-    except ValueError:
-        flash('Invalid date of birth format.')
-        return redirect(url_for('home'))
+        user = User(
+            name=name,
+            email=email,
+            password=hashed_password,
+            is_employer=True if role == "employer" else False
+        )
 
-    if calculate_age(dob) < 15:
-        flash('You must be at least 15 years old to register.')
-        return redirect(url_for('home'))
+        db.session.add(user)
+        db.session.commit()
 
-    # Check existing user
-    if User.query.filter_by(email=email).first():
-        flash('Email already registered. Please login.')
-        return redirect(url_for('home'))
+        flash("Registration successful. Please login.", "success")
+        return redirect(url_for("login"))
 
-    # Create user
-    hashed = generate_password_hash(password)
-    new_user = User(name=name, email=email, phone=phone, region=region, role=role, gender=gender, dob=dob, password=hashed)
-    db.session.add(new_user)
-    db.session.commit()
+    return render_template("register.html")
 
-    # set session
-    session['user_name'] = new_user.name
-    session['user_id'] = new_user.id
-    session['role'] = new_user.role
-    flash('Registration successful — welcome!')
-    return redirect(url_for('dashboard'))
+# ----------------------------------
+# LOGIN
+# ----------------------------------
 
-@app.route('/login', methods=['POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    email = request.form.get('email', '').strip().lower()
-    password = request.form.get('password', '')
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
 
-    if not email or not password:
-        flash('Please enter email and password.')
-        return redirect(url_for('home'))
+        user = User.query.filter_by(email=email).first()
 
-    user = User.query.filter_by(email=email).first()
-    if user and check_password_hash(user.password, password):
-        session['user_name'] = user.name
-        session['user_id'] = user.id
-        session['role'] = user.role
-        flash('Login successful.')
-        return redirect(url_for('dashboard'))
-    flash('Invalid credentials.')
-    return redirect(url_for('home'))
+        if not user or not check_password_hash(user.password, password):
+            flash("Invalid email or password", "error")
+            return redirect(url_for("login"))
 
-@app.route('/logout')
+        session["user_id"] = user.id
+        session["is_employer"] = user.is_employer
+        session["user_name"] = user.name
+
+        flash("Logged in successfully", "success")
+        return redirect(url_for("home"))
+
+    return render_template("login.html")
+
+# ----------------------------------
+# LOGOUT
+# ----------------------------------
+
+@app.route("/logout")
 def logout():
     session.clear()
-    flash('Logged out.')
-    return redirect(url_for('home'))
+    flash("Logged out successfully", "success")
+    return redirect(url_for("home"))
 
-@app.route('/dashboard')
-def dashboard():
-    if not session.get('user_name'):
-        flash('Login required to view dashboard.')
-        return redirect(url_for('home'))
+# ----------------------------------
+# POST JOB (EMPLOYER ONLY)
+# ----------------------------------
 
-    if session.get('role') == 'Job Giver':
-        jobs = Job.query.filter_by(posted_by=session.get('user_id')).order_by(Job.date_posted.desc()).all()
-    else:
-        jobs = Job.query.order_by(Job.date_posted.desc()).all()
-    return render_template('dashboard.html', jobs=jobs)
-
-@app.route('/post-job', methods=['POST'])
+@app.route("/post-job", methods=["GET", "POST"])
 def post_job():
-    if not session.get('user_name') or session.get('role') != 'Job Giver':
-        flash('Only Job Givers can post jobs.')
-        return redirect(url_for('dashboard'))
+    if "user_id" not in session or not session.get("is_employer"):
+        flash("Employers only. Please login.", "error")
+        return redirect(url_for("login"))
 
-    title = request.form.get('title', '').strip()
-    company = request.form.get('company', '').strip()
-    location = request.form.get('location', '').strip()
-    description = request.form.get('description', '').strip()
+    if request.method == "POST":
+        title = request.form["title"]
+        company = request.form["company"]
+        location = request.form["location"]
+        description = request.form["description"]
+        requirements = request.form["requirements"]
 
-    if not all([title, company, location, description]):
-        flash('All job fields are required.')
-        return redirect(url_for('dashboard'))
+        job = Job(
+            title=title,
+            company=company,
+            location=location,
+            description=description,
+            requirements=requirements
+        )
 
-    job = Job(title=title, company=company, location=location, description=description, posted_by=session.get('user_id'))
-    db.session.add(job)
-    db.session.commit()
-    flash('Job posted successfully.')
-    return redirect(url_for('dashboard'))
+        db.session.add(job)
+        db.session.commit()
 
-@app.route('/search')
-def search():
-    query = request.args.get('query', '').strip()
-    if not session.get('user_name'):
-        # For UX: we prompt user to register via modal on client side - also flash here
-        flash('Please register or login to search jobs.')
-        return redirect(url_for('home'))
+        flash("Job posted successfully", "success")
+        return redirect(url_for("jobs"))
 
-    if not query:
-        flash('Please enter a search term.')
-        return redirect(url_for('dashboard'))
+    return render_template("post_job.html")
 
-    jobs = Job.query.filter(
-        (Job.title.ilike(f'%{query}%')) |
-        (Job.company.ilike(f'%{query}%')) |
-        (Job.location.ilike(f'%{query}%'))
-    ).order_by(Job.date_posted.desc()).all()
+# ----------------------------------
+# DASHBOARD
+# ----------------------------------
 
-    return render_template('jobs.html', jobs=jobs, query=query)
+@app.route("/dashboard")
+def dashboard():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
 
-# ---------- Init DB ----------
-if __name__ == '__main__':
+    jobs = Job.query.order_by(Job.date_posted.desc()).all()
+    return render_template("dashboard.html", jobs=jobs)
+
+# ----------------------------------
+# RUN APP
+# ----------------------------------
+
+if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)

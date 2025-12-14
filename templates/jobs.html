@@ -1,22 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container container-compact mt-5">
-  <h4>Search results for "{{ query }}"</h4>
-  {% if jobs %}
-    <ul class="list-group mt-3">
-      {% for job in jobs %}
-        <li class="list-group-item">
-          <strong>{{ job.title }}</strong> — {{ job.company }} ({{ job.location }})
-          <div>{{ job.description }}</div>
-          <small class="text-muted">Posted: {{ job.date_posted.strftime('%d %b %Y') }}</small>
-          {% if session.get('role') == 'Job Finder' %}
-            <div class="mt-2"><button class="btn btn-success btn-sm">Apply</button></div>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="text-muted">No jobs found.</p>
-  {% endif %}
-</div>
+
+<!-- Jobs Page Header -->
+<section class="jobs-header">
+    <div class="container">
+        <h1>All Jobs</h1>
+        <p>Browse through all the latest job listings in Ghana</p>
+
+        <!-- Search & Filter Form -->
+        <form action="{{ url_for('jobs') }}" method="GET" class="job-search-form">
+            <input type="text" name="keyword" placeholder="Job title, keywords..." value="{{ request.args.get('keyword', '') }}">
+            <input type="text" name="location" placeholder="Location" value="{{ request.args.get('location', '') }}">
+            <select name="job_type">
+                <option value="">All Job Types</option>
+                <option value="Full-time" {% if request.args.get('job_type')=='Full-time' %}selected{% endif %}>Full-time</option>
+                <option value="Part-time" {% if request.args.get('job_type')=='Part-time' %}selected{% endif %}>Part-time</option>
+                <option value="Contract" {% if request.args.get('job_type')=='Contract' %}selected{% endif %}>Contract</option>
+            </select>
+            <button type="submit" class="btn-gold">Filter</button>
+        </form>
+    </div>
+</section>
+
+<!-- Job Listings Section -->
+<section class="jobs-listings">
+    <div class="container">
+        {% if jobs %}
+            {% for job in jobs %}
+            <div class="job-card">
+                <h3><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
+                <p class="company">{{ job.company }} - {{ job.location }}</p>
+                <p class="job-type">Type: {{ job.job_type }} | Posted: {{ job.date_posted }}</p>
+                <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn-gold">Apply Now</a>
+            </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            <div class="pagination">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('jobs', page=pagination.prev_num, keyword=request.args.get('keyword'), location=request.args.get('location'), job_type=request.args.get('job_type')) }}">&laquo; Prev</a>
+                {% endif %}
+                <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('jobs', page=pagination.next_num, keyword=request.args.get('keyword'), location=request.args.get('location'), job_type=request.args.get('job_type')) }}">Next &raquo;</a>
+                {% endif %}
+            </div>
+
+        {% else %}
+            <p>No jobs found matching your criteria. Please adjust your search.</p>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Optional Advertisement Section -->
+<section class="ads-section">
+    <div class="container">
+        <!-- Ad placeholder for RevenueHits or other networks -->
+    </div>
+</section>
+
 {% endblock %}

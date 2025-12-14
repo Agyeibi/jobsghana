@@ -1,29 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card p-4 shadow-sm">
-            <h3 class="mb-3">Post a Job</h3>
-            <form method="post">
-                <div class="mb-3">
-                    <input type="text" name="title" class="form-control" placeholder="Job Title" required>
-                </div>
-                <div class="mb-3">
-                    <textarea name="description" class="form-control" placeholder="Job Description" rows="4" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <input type="text" name="category" class="form-control" placeholder="Category">
-                </div>
-                <div class="mb-3">
-                    <input type="text" name="location" class="form-control" placeholder="Location">
-                </div>
-                <div class="form-check mb-3">
-                    <input type="checkbox" name="is_paid" class="form-check-input" id="paidCheck">
-                    <label class="form-check-label" for="paidCheck">Premium / Paid Job</label>
-                </div>
-                <button class="btn btn-primary w-100">Post Job</button>
-            </form>
-        </div>
+
+<!-- Post Job Header -->
+<section class="post-job-header">
+    <div class="container">
+        <h1>Post a Job</h1>
+        <p>Fill in the details below to post a job and reach thousands of job seekers.</p>
     </div>
-</div>
+</section>
+
+<!-- Job Posting Form -->
+<section class="post-job-form-section">
+    <div class="container">
+        {% if message %}
+            <p class="success-message">{{ message }}</p>
+        {% endif %}
+        <form action="{{ url_for('post_job') }}" method="POST" class="post-job-form">
+            <label for="title">Job Title</label>
+            <input type="text" name="title" id="title" placeholder="e.g. Software Engineer" required>
+
+            <label for="company">Company Name</label>
+            <input type="text" name="company" id="company" placeholder="e.g. Tech Corp" required>
+
+            <label for="location">Location</label>
+            <input type="text" name="location" id="location" placeholder="e.g. Accra" required>
+
+            <label for="job_type">Job Type</label>
+            <select name="job_type" id="job_type" required>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+            </select>
+
+            <label for="description">Job Description</label>
+            <textarea name="description" id="description" placeholder="Provide detailed job description" required></textarea>
+
+            <label for="requirements">Requirements (comma-separated)</label>
+            <input type="text" name="requirements" id="requirements" placeholder="e.g. Bachelor's Degree, 3+ years experience">
+
+            <label for="benefits">Benefits (comma-separated)</label>
+            <input type="text" name="benefits" id="benefits" placeholder="e.g. Health insurance, Paid leave">
+
+            <button type="submit" class="btn-gold">Post Job</button>
+        </form>
+    </div>
+</section>
+
 {% endblock %}

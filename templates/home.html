@@ -1,50 +1,66 @@
 {% extends "base.html" %}
 {% block content %}
+
+<!-- Hero Section -->
 <section class="hero">
-  <div class="container text-center">
-    <h1>Find Jobs or Hire Talent in Ghana</h1>
-    <p>Browse thousands of job listings or post your own jobs. Connecting talent and opportunities across Ghana.</p>
-
-    <div class="search-box-wrapper mt-4">
-      <form class="search-box" action="{{ url_for('search') }}" method="get">
-        <input type="text" name="query" placeholder="Search jobs, companies, locations..." required>
-        <button type="submit">Search</button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="container container-compact">
-    <h2>Latest Jobs</h2>
-    <div class="row">
-      {% if jobs %}
-        {% for job in jobs %}
-        <div class="col-md-4">
-          <div class="card-feature">
-            <h5>{{ job.title }}</h5>
-            <p><strong>Company:</strong> {{ job.company }}</p>
-            <p><strong>Location:</strong> {{ job.location }}</p>
-            <p><strong>Posted:</strong> {{ job.date_posted.strftime('%b %d, %Y') }}</p>
-            <a href="#" class="btn btn-sm btn-dark mt-2 w-100">View Details</a>
-          </div>
+    <div class="container hero-container">
+        <div class="hero-text">
+            <h1>Find Your Dream Job in Ghana</h1>
+            <p>Search thousands of jobs and land your next career opportunity today.</p>
+            <form action="{{ url_for('jobs') }}" method="GET" class="job-search-form">
+                <input type="text" name="keyword" placeholder="Job title, keywords..." required>
+                <input type="text" name="location" placeholder="Location">
+                <button type="submit" class="btn-gold">Search Jobs</button>
+            </form>
         </div>
-        {% endfor %}
-      {% else %}
-        <p>No jobs posted yet. Check back later!</p>
-      {% endif %}
+        <div class="hero-image">
+            <img src="{{ url_for('static', filename='images/hero-image.jpg') }}" alt="JobsGhana">
+        </div>
     </div>
-  </div>
 </section>
 
-<section style="background:#f9f9f9;">
-  <div class="container container-compact">
-    <h2>Why Choose JobsGhana?</h2>
-    <div class="row mt-4">
-      <div class="col-md-4"><div class="card-feature"><h5>Trusted Platform</h5><p>Connect safely with employers and job seekers across Ghana.</p></div></div>
-      <div class="col-md-4"><div class="card-feature"><h5>Easy to Use</h5><p>Post and find jobs quickly with our simple and responsive interface.</p></div></div>
-      <div class="col-md-4"><div class="card-feature"><h5>Free & Secure</h5><p>Sign up for free and enjoy secure communication and job postings.</p></div></div>
+<!-- Featured Jobs Section -->
+<section class="featured-jobs">
+    <div class="container">
+        <h2>Latest Jobs</h2>
+        <div class="job-listings">
+            {% if jobs %}
+                {% for job in jobs %}
+                <div class="job-card">
+                    <h3><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
+                    <p class="company">{{ job.company }} - {{ job.location }}</p>
+                    <p class="job-type">Type: {{ job.job_type }} | Posted: {{ job.date_posted }}</p>
+                    <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn-gold">Apply Now</a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No jobs found at the moment. Please check back later.</p>
+            {% endif %}
+        </div>
     </div>
-  </div>
 </section>
+
+<!-- Call-to-Action Section -->
+<section class="cta">
+    <div class="container cta-container">
+        <div class="cta-box">
+            <h3>Employers</h3>
+            <p>Post your job vacancies and reach thousands of job seekers instantly.</p>
+            <a href="{{ url_for('post_job') }}" class="btn-gold">Post a Job</a>
+        </div>
+        <div class="cta-box">
+            <h3>Job Seekers</h3>
+            <p>Sign up today and apply for the latest jobs across Ghana.</p>
+            <a href="{{ url_for('register') }}" class="btn-gold">Register</a>
+        </div>
+    </div>
+</section>
+
+<!-- Optional Advertisement Section -->
+<section class="ads-section">
+    <div class="container">
+        <!-- Ad placeholder, can insert ad scripts here -->
+    </div>
+</section>
+
 {% endblock %}

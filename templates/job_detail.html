@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Job Detail Header -->
+<section class="job-detail-header">
+    <div class="container">
+        <h1>{{ job.title }}</h1>
+        <p class="company">{{ job.company }} - {{ job.location }}</p>
+        <p class="job-type">Type: {{ job.job_type }} | Posted: {{ job.date_posted }}</p>
+    </div>
+</section>
+
+<!-- Job Description -->
+<section class="job-description">
+    <div class="container">
+        <h2>Job Description</h2>
+        <p>{{ job.description | safe }}</p>
+
+        {% if job.requirements %}
+        <h3>Requirements</h3>
+        <ul>
+            {% for req in job.requirements.split(',') %}
+            <li>{{ req }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if job.benefits %}
+        <h3>Benefits</h3>
+        <ul>
+            {% for benefit in job.benefits.split(',') %}
+            <li>{{ benefit }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Apply Section -->
+<section class="job-apply">
+    <div class="container">
+        {% if 'user_id' in session %}
+            <form action="{{ url_for('apply_job', job_id=job.id) }}" method="POST">
+                <button type="submit" class="btn-gold">Apply Now</button>
+            </form>
+        {% else %}
+            <p>You must <a href="{{ url_for('login') }}">login</a> or <a href="{{ url_for('register') }}">register</a> to apply for this job.</p>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Optional Advertisement Section -->
+<section class="ads-section">
+    <div class="container">
+        <!-- Ad placeholder for RevenueHits or other networks -->
+    </div>
+</section>
+
+{% endblock %}

@@ -2,204 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JobsGhana</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="icon" href="{{ url_for('static', filename='images/logo.jpg') }}" type="image/jpg">
-
-    <style>
-      :root{
-        --gold: #d4af37;
-        --black: #0b0b0b;
-        --muted: #f3f3f3;
-      }
-
-      body {
-        background: white;
-        color: #222;
-        font-family: Inter, system-ui, Arial;
-      }
-
-      .navbar.bg-primary {
-        background: linear-gradient(90deg,#0b0b0b,#111);
-      }
-      .navbar .navbar-brand { color: var(--gold); font-weight:700; font-size:1.25rem; }
-      .navbar .btn-light { background: var(--gold); color: #111; font-weight:600; }
-      .navbar .btn-outline-light { color: #fff; border-color: rgba(255,255,255,0.15); }
-
-      /* Hero */
-      .hero { height: 68vh; display:flex; align-items:center; justify-content:center; text-align:center; color:white; z-index:1; }
-      .hero h1 { font-size: 3.2rem; font-weight:800; letter-spacing: -0.02em; color: var(--gold); }
-      .hero p { font-size: 1.1rem; color:#fff; max-width:900px; margin:0 auto 1rem; opacity:0.95; }
-
-      /* Video and overlay */
-      #bg-video { position: fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
-      .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.55); z-index:-1; }
-
-      /* Search */
-      .search-box-wrapper { margin-top:-40px; display:flex; justify-content:center; z-index:2; }
-      .search-box { width:90%; max-width:820px; display:flex; box-shadow: 0 8px 30px rgba(0,0,0,0.3); border-radius:8px; overflow:hidden; }
-      .search-box input { padding:16px 18px; border:0; font-size:1rem; flex:1; outline:none; }
-      .search-box button { background:var(--gold); border:0; padding:14px 22px; font-weight:700; color:#0b0b0b; }
-
-      section { padding:80px 20px; text-align:center; background:#fff; color:#222; }
-      section h2 { color:#111; font-weight:700; margin-bottom:18px; font-size:1.9rem; }
-      .card-feature, .card { border-radius:10px; padding:20px; margin:12px; box-shadow:0 10px 30px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.3s; }
-      .card-feature:hover, .card:hover { transform: translateY(-3px); box-shadow:0 12px 30px rgba(0,0,0,0.15); }
-
-      .modal-backdrop.show { opacity:0.7; background: rgba(0,0,0,0.75); }
-
-      /* Buttons */
-      .btn-dark { background: #111; color: #fff; border-radius: 6px; }
-      .btn-success { background: #28a745; color: #fff; border-radius: 6px; }
-
-      /* Utility */
-      .container-compact { max-width:1100px; margin:0 auto; }
-
-      @media (max-width: 576px) {
-          .hero h1 { font-size: 2rem; }
-          .search-box { flex-direction: column; }
-          .search-box input, .search-box button { width: 100%; margin-bottom: 10px; }
-      }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.jpg') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-
-  <!-- Video background + overlay -->
-  <video autoplay muted loop id="bg-video">
-      <source src="{{ url_for('static', filename='videos/background.mp4') }}" type="video/mp4">
-      Your browser does not support HTML5 video.
-  </video>
-  <div class="overlay"></div>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg bg-primary">
-    <div class="container container-compact">
-      <a class="navbar-brand" href="{{ url_for('home') }}">
-        <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="logo" style="height:36px; margin-right:8px; border-radius:6px;">
-        JobsGhana
-      </a>
-
-      <div class="collapse navbar-collapse justify-content-end">
-        <ul class="navbar-nav">
-          {% if session.get('user_name') %}
-            <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('dashboard') }}">Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('logout') }}">Logout</a></li>
-          {% else %}
-            <li class="nav-item me-2">
-              <a class="btn btn-outline-light" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="btn btn-light" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Register</a>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Flash messages -->
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="container container-compact mt-4">
-        {% for m in messages %}
-          <div class="alert alert-info">{{ m }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
-
-  <!-- PAGE CONTENT -->
-  {% block content %}{% endblock %}
-
-  <!-- LOGIN Modal -->
-  <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Login</h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('home') }}" class="logo">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="JobsGhana Logo">
+            </a>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('jobs') }}">Jobs</a></li>
+                <li><a href="{{ url_for('post_job') }}">Post Job</a></li>
+                {% if 'user_id' in session %}
+                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    <li><a href="{{ url_for('register') }}">Register</a></li>
+                {% endif %}
+            </ul>
+            <div class="mobile-menu">
+                <span class="menu-toggle">&#9776;</span>
+            </div>
         </div>
-        <div class="modal-body">
-          <form action="{{ url_for('login') }}" method="post">
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input class="form-control" type="email" name="email" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Password</label>
-              <input class="form-control" type="password" name="password" required>
-            </div>
-            <button class="btn btn-dark w-100" type="submit">Login</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+    </nav>
 
-  <!-- REGISTER Modal -->
-  <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Register</h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form action="{{ url_for('register') }}" method="post">
-            <div class="mb-2"><label class="form-label">Full Name</label><input class="form-control" name="name" required></div>
-            <div class="mb-2"><label class="form-label">Email</label><input class="form-control" type="email" name="email" required></div>
-            <div class="mb-2"><label class="form-label">Phone</label><input class="form-control" name="phone" placeholder="+233XXXXXXXXX" pattern="\+233[0-9]{9}" required></div>
-            <div class="mb-2"><label class="form-label">Region</label>
-              <select class="form-select" name="region" required>
-                <option value="">Select Region</option>
-                <option>Ashanti</option><option>Greater Accra</option><option>Central</option>
-                <option>Eastern</option><option>Western</option><option>Volta</option>
-                <option>Northern</option><option>Upper East</option><option>Upper West</option>
-                <option>Bono</option><option>Bono East</option><option>Ahafo</option>
-                <option>Oti</option><option>Western North</option>
-              </select>
-            </div>
-            <div class="mb-2"><label class="form-label">Gender</label>
-              <select class="form-select" name="gender" required>
-                <option value="">Select Gender</option><option>Male</option><option>Female</option>
-              </select>
-            </div>
-            <div class="mb-2"><label class="form-label">Date of Birth</label>
-              <input class="form-control" type="date" name="dob" id="registerDOB" required>
-            </div>
-            <div class="mb-2"><label class="form-label">Register As</label>
-              <select class="form-select" name="role" required>
-                <option value="">Select Role</option><option>Job Finder</option><option>Job Giver</option>
-              </select>
-            </div>
-            <div class="mb-2"><label class="form-label">Password</label>
-              <input class="form-control" type="password" name="password" required>
-            </div>
-            <button class="btn btn-dark w-100" type="submit">Register</button>
-          </form>
-          <hr>
-          <div class="text-center">
-            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">I already have an account? Login</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    <!-- Main content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function(){
-      const dobInput = document.getElementById('registerDOB');
-      if(dobInput){
-        const today = new Date();
-        const minAge = 15;
-        const year = today.getFullYear() - minAge;
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        dobInput.max = `${year}-${month}-${day}`;
-      }
-    });
-  </script>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-left">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="footer-logo">
+                <p>&copy; {{ current_year }} JobsGhana. All rights reserved.</p>
+            </div>
+            <div class="footer-right">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('jobs') }}">Jobs</a></li>
+                    <li><a href="{{ url_for('post_job') }}">Post Job</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile menu toggle
+        $(document).ready(function() {
+            $('.menu-toggle').click(function() {
+                $('.nav-links').toggleClass('active');
+            });
+        });
+    </script>
 </body>
 </html>

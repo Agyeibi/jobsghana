@@ -1,18 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center mt-5">
-  <div class="col-md-6">
-    <h2 class="text-center">Register</h2>
-    <form method="POST">
-      {{ form.hidden_tag() }}
-      <div class="mb-3">{{ form.username.label }} {{ form.username(class="form-control") }}</div>
-      <div class="mb-3">{{ form.email.label }} {{ form.email(class="form-control") }}</div>
-      <div class="mb-3">{{ form.password.label }} {{ form.password(class="form-control") }}</div>
-      <div class="mb-3">{{ form.confirm_password.label }} {{ form.confirm_password(class="form-control") }}</div>
-      <div class="mb-3">{{ form.role.label }} {{ form.role(class="form-select") }}</div>
-      <div class="mb-3">{{ form.submit(class="btn btn-success w-100") }}</div>
-    </form>
-    <p class="text-center mt-2">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
-  </div>
-</div>
+
+<!-- Register Header -->
+<section class="auth-header">
+    <div class="container">
+        <h1>Register</h1>
+        <p>Create your JobsGhana account to apply for jobs or post vacancies.</p>
+    </div>
+</section>
+
+<!-- Registration Form -->
+<section class="auth-form-section">
+    <div class="container">
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% endif %}
+        {% if message %}
+            <p class="success-message">{{ message }}</p>
+        {% endif %}
+        <form action="{{ url_for('register') }}" method="POST" class="auth-form">
+            <label for="name">Full Name</label>
+            <input type="text" name="name" id="name" placeholder="Enter your full name" required>
+
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" placeholder="Enter your email" required>
+
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" placeholder="Create a password" required>
+
+            <label for="role">Account Type</label>
+            <select name="role" id="role" required>
+                <option value="job_seeker">Job Seeker</option>
+                <option value="employer">Employer</option>
+            </select>
+
+            <button type="submit" class="btn-gold">Register</button>
+        </form>
+
+        <p class="auth-footer">
+            Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+        </p>
+    </div>
+</section>
+
 {% endblock %}
