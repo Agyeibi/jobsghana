@@ -28,7 +28,7 @@
         {% if jobs %}
             {% for job in jobs %}
             <div class="job-card">
-                <h3><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></h3>
+                <h3><a href="{{ url_for('job_details', job_id=job.id) }}">{{ job.title }}</a></h3>
                 <p class="company">{{ job.company }} - {{ job.location }}</p>
                 <p class="job-type">Type: {{ job.job_type }} | Posted: {{ job.date_posted }}</p>
                 <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn-gold">Apply Now</a>

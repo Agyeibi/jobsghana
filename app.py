@@ -64,9 +64,9 @@ def job_details(job_id):
     job = Job.query.get_or_404(job_id)
     return render_template("job_details.html", job=job)
 
-# ----------------------------------
+# ---------------------------------
 # REGISTER
-# ----------------------------------
+# ---------------------------------
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
