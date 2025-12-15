@@ -38,11 +38,10 @@ class Job(db.Model):
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ----------------------------------
-# CREATE TABLES (RAILWAY FIX)
+# CREATE TABLES (FLASK 3+ / RAILWAY FIX)
 # ----------------------------------
 
-@app.before_first_request
-def create_tables():
+with app.app_context():
     db.create_all()
 
 # ----------------------------------
