@@ -38,6 +38,14 @@ class Job(db.Model):
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ----------------------------------
+# CREATE TABLES (RAILWAY FIX)
+# ----------------------------------
+
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+# ----------------------------------
 # HOME / INDEX
 # ----------------------------------
 
@@ -56,7 +64,7 @@ def jobs():
     return render_template("jobs.html", jobs=jobs)
 
 # ----------------------------------
-# JOB DETAILS (IMPORTANT FIX)
+# JOB DETAILS
 # ----------------------------------
 
 @app.route("/job/<int:job_id>")
@@ -76,18 +84,15 @@ def register():
         password = request.form["password"]
         role = request.form.get("role")
 
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
+        if User.query.filter_by(email=email).first():
             flash("Email already registered", "error")
             return redirect(url_for("register"))
-
-        hashed_password = generate_password_hash(password)
 
         user = User(
             name=name,
             email=email,
-            password=hashed_password,
-            is_employer=True if role == "employer" else False
+            password=generate_password_hash(password),
+            is_employer=(role == "employer")
         )
 
         db.session.add(user)
@@ -144,18 +149,12 @@ def post_job():
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        title = request.form["title"]
-        company = request.form["company"]
-        location = request.form["location"]
-        description = request.form["description"]
-        requirements = request.form["requirements"]
-
         job = Job(
-            title=title,
-            company=company,
-            location=location,
-            description=description,
-            requirements=requirements
+            title=request.form["title"],
+            company=request.form["company"],
+            location=request.form["location"],
+            description=request.form["description"],
+            requirements=request.form["requirements"]
         )
 
         db.session.add(job)
@@ -179,13 +178,8 @@ def dashboard():
     return render_template("dashboard.html", jobs=jobs)
 
 # ----------------------------------
-# RUN APP
+# RUN LOCAL ONLY
 # ----------------------------------
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
-
+    app.run(debug=True)
